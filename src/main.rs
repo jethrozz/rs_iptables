@@ -6,7 +6,7 @@ use ssh2::{Channel,Session};
 const HOST: &'static str = "127.0.0.1";
 const PORT: u16 = 22;
 const USER_NAME: &'static str = "root";
-const PASSWORD: &'static str = "1234567";
+const PASSWORD: &'static str = "123456";
 
 //iptables 5表4链 定义常量 ，目前最常用到的是filter表和nat表
 const T_FILTER: &'static str = "filter";
