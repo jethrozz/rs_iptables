@@ -1,6 +1,8 @@
 use std::error::Error;
+use std::io::{Read, Write};
 use ssh2::Channel;
-
+use std::cell::RefCell;
+use crate::session::channel::{get_channel, close_channel};
 
 //iptables 5表4链 定义常量 ，目前最常用到的是filter表和nat表
 const T_FILTER: &'static str = "filter";
@@ -17,8 +19,8 @@ const BUILTIN_CHAINS_FILTER: &[&str] = &[C_INPUT, C_FORWARD, C_OUTPUT, C_DOCKER]
 const BUILTIN_CHAINS_NAT: &[&str] = &[C_PREROUTING, C_POSTROUTING, C_OUTPUT, C_DOCKER];
 
 
-pub struct IpTables<'a> {
-    channel: &'a mut Channel,
+pub struct IpTables {
+    pub  channel: RefCell<Channel>,
     pub cmd: String,
     /// Indicates if iptables has -C (--check) option
     pub has_check: bool,
@@ -45,7 +47,7 @@ fn error_from_str(msg: &str) -> Box<dyn Error> {
 
 
 
-impl IpTables<'a> {
+impl IpTables {
     pub fn get_policy(&self, table: &str, chain: &str) -> Result<String, Box<dyn Error>> {
         let builtin_chains = get_builtin_chains(table)?;
         if !builtin_chains.iter().as_slice().contains(&chain) {
@@ -59,16 +61,16 @@ impl IpTables<'a> {
             true => format!("iptables -t {} -L {} -n -v", table, chain),
             false => format!("iptables -t {} -L {} -v", table, chain),
         };
-
-        self.channel.exec(&cmd).unwrap();
+        self.channel.borrow_mut().exec(&cmd).unwrap();
         let mut iptables_l_n_cmd = String::new();
-        self.channel.read_to_string(&mut iptables_l_n_cmd).unwrap();
+        self.channel.borrow_mut().read_to_string(&mut iptables_l_n_cmd).unwrap();
         return Ok(iptables_l_n_cmd);
     }
 
-    pub fn new<'a>(channel: &'a mut Channel) -> IpTables {
+    pub fn new() -> IpTables {
+        let m_channel = RefCell::new(get_channel());
         return IpTables {
-            channel,
+            channel: m_channel,
             cmd: String::new(),
             has_check: false,
             has_wait: false,
