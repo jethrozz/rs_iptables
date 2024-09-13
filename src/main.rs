@@ -2,11 +2,11 @@ mod iptables;
 mod session;
 mod config;
 
-use iptables::IpTables;
+use crate::iptables::iptable_cmd::IpTablesCmd;
 
 fn main() {
-    let mut iptables = IpTables::new();
+    let ip_tables_cmd = IpTablesCmd::new();
 
-    let result = iptables.get_policy("filter", "INPUT").unwrap();
+    let result = ip_tables_cmd.get_policy("filter", "INPUT").unwrap();
     print!("{}", result)
 }

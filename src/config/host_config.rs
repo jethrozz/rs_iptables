@@ -2,13 +2,13 @@ use serde::Deserialize;
 
 #[derive(Deserialize)]
 pub struct Config {
-    host: Host,
+    pub host: Host,
 }
 
 #[derive(Deserialize)]
 pub struct Host {
-    port: u16,
-    host: String,
-    user: String,
-    password: String,
+    pub port: u16,
+    pub host: String,
+    pub user: String,
+    pub password: String,
 }
